@@ -1,8 +1,7 @@
 nome: box1x10
-altura: 1
-largura: 10
-escala: 10
+funçãoDeAtivação: identidade
 bias: 0
-funcao: identidade
-mascara:
+tamanho: 1x10
+escala: 10
+máscara:
 1 1 1 1 1 1 1 1 1 1

@@ -8,7 +8,6 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"golang.org/x/image/tiff"
 )
@@ -99,26 +98,17 @@ func ToRGB(imgOriginal image.Image) *image.RGBA {
 	altura := dimensoes.Dy()
 
 	imgEmRGB := image.NewRGBA(dimensoes)
-	var mu sync.Mutex
 	// percorrendo a imagem
-	var semaforo sync.WaitGroup
 	for y := 0; y < altura; y++ {
 		for x := 0; x < largura; x++ {
-			semaforo.Add(1)
-			go func(x, y int) {
-				defer semaforo.Done()
-				r, g, b, a := imgOriginal.At(x, y).RGBA()
-				mu.Lock()
-				imgEmRGB.Set(x, y, color.RGBA{
-					R: uint8(r >> 8),
-					G: uint8(g >> 8),
-					B: uint8(b >> 8),
-					A: uint8(a),
-				})
-				mu.Unlock()
-			}(x, y)
+			r, g, b, a := imgOriginal.At(x, y).RGBA()
+			imgEmRGB.Set(x, y, color.RGBA{
+				R: uint8(r >> 8),
+				G: uint8(g >> 8),
+				B: uint8(b >> 8),
+				A: uint8(a),
+			})
 		}
 	}
-	semaforo.Wait()
 	return imgEmRGB
 }

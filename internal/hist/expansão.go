@@ -3,7 +3,6 @@ package hist
 import (
 	"image"
 	"image/color"
-	"sync"
 )
 
 func Expansão(img *image.RGBA) *image.RGBA {
@@ -61,30 +60,23 @@ func Expansão(img *image.RGBA) *image.RGBA {
 	}
 
 	// aplicando a fórmula
-	var semaforo sync.WaitGroup
 	imagemNova := image.NewRGBA(dimensões)
 	for y := dimensões.Min.Y; y < dimensões.Max.Y; y++ {
 		for x := dimensões.Min.X; x < dimensões.Max.X; x++ {
-			semaforo.Add(1)
-			// agora podemos tornas a aplicação da fórmula concorrente
-			go func(x, y int) {
-				defer semaforo.Done()
-				rgb := img.RGBAAt(x, y)
+			rgb := img.RGBAAt(x, y)
 
-				newR := uint8((int(rgb.R) - minR) * 255 / rangeR)
-				newG := uint8((int(rgb.G) - minG) * 255 / rangeG)
-				newB := uint8((int(rgb.B) - minB) * 255 / rangeB)
+			newR := uint8((int(rgb.R) - minR) * 255 / rangeR)
+			newG := uint8((int(rgb.G) - minG) * 255 / rangeG)
+			newB := uint8((int(rgb.B) - minB) * 255 / rangeB)
 
-				imagemNova.SetRGBA(x, y, color.RGBA{
-					R: newR,
-					G: newG,
-					B: newB,
-					A: rgb.A,
-				})
+			imagemNova.SetRGBA(x, y, color.RGBA{
+				R: newR,
+				G: newG,
+				B: newB,
+				A: rgb.A,
+			})
 
-			}(x, y)
 		}
 	}
-	semaforo.Wait()
 	return imagemNova
 }

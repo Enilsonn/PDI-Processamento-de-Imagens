@@ -1,9 +1,9 @@
 nome: sobel_v
-funcao: identidade
+funçãoDeAtivação: identidade
 bias: 0
 tamanho: 3x3
 escala: 1
-mascara:
+máscara:
 -1 0 1
 -2 0 2
 -1 0 1

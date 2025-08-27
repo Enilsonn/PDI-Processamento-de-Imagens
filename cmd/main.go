@@ -38,7 +38,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("%v\n", kernel)
+		fmt.Printf("%#v\n", kernel)
 
 		imgRGB = corr.AplicarCorrelação(imgRGB, kernel)
 	}

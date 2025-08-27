@@ -59,21 +59,25 @@ func LoadKernel(path string) (*Kernel, error) {
 
 		//linhas com cabeçalho:
 		if strings.HasPrefix(linha, "nome:") {
-			nome := strings.TrimPrefix(linha, "name:")
+			nome := strings.TrimPrefix(linha, "nome:")
 			kernel.Nome = strings.TrimSpace(nome)
+			continue
 
-		} else if strings.HasPrefix(linha, "funçãoDeAtivaçao:") {
-			função := strings.TrimPrefix(linha, "funçãoDeAtivaçao:")
+		} else if strings.HasPrefix(linha, "funçãoDeAtivação") {
+			função := strings.TrimPrefix(linha, "funçãoDeAtivação")
 			função = strings.TrimSpace(função)
 			kernel.FunçãoDeAtivação = strings.ToLower(função)
+			continue
 
 		} else if strings.HasPrefix(linha, "bias:") {
+			fmt.Println("aqui bias")
 			bias := strings.TrimPrefix(linha, "bias:")
 			bias = strings.TrimSpace(bias)
 			kernel.Bias, err = strconv.Atoi(bias)
 			if err != nil {
 				return nil, fmt.Errorf("formato do bias é inválido")
 			}
+			continue
 
 		} else if strings.HasPrefix(linha, "tamanho:") {
 			tamanho := strings.TrimPrefix(linha, "tamanho:")
@@ -90,6 +94,7 @@ func LoadKernel(path string) (*Kernel, error) {
 			if err != nil {
 				return nil, fmt.Errorf("formato da largula é inválido")
 			}
+			continue
 
 		} else if strings.HasPrefix(linha, "escala:") {
 			escala := strings.TrimPrefix(linha, "escala:")
@@ -98,11 +103,15 @@ func LoadKernel(path string) (*Kernel, error) {
 			if err != nil {
 				return nil, fmt.Errorf("formato da escala é inválido")
 			}
+			continue
 
 		} else if strings.HasPrefix(linha, "máscara:") {
 			flagMascara = true
+			continue
+
 		} else if flagMascara {
 			linhasDaMascara = append(linhasDaMascara, linha)
+			continue
 		}
 	}
 
@@ -115,6 +124,7 @@ func LoadKernel(path string) (*Kernel, error) {
 	// linhas da máscara:
 	for _, linha := range linhasDaMascara {
 		valores := strings.Fields(linha)
+
 		if len(valores) != kernel.Largura {
 			return nil, fmt.Errorf("a largura da máscara não está de acordo com a largura informada")
 		}

@@ -3,7 +3,6 @@ package hist
 import (
 	"image"
 	"image/color"
-	"sync"
 )
 
 // https://github.com/hybridgroup/gocv
@@ -17,7 +16,6 @@ func Equalização(img *image.RGBA) *image.RGBA {
 	dimensões := img.Bounds()
 	largura := dimensões.Dx()
 	altura := dimensões.Dy()
-	var semaforo sync.WaitGroup
 
 	// as frequências
 	histR := make([]int, 256)
@@ -64,52 +62,37 @@ func Equalização(img *image.RGBA) *image.RGBA {
 	cdfMinG := 0
 	cdfMinB := 0
 	for i := 0; i < 256; i++ {
-		semaforo.Add(1)
-		go func(i int) {
-			defer semaforo.Done()
-			if cdfR[i] != 0 && cdfMinR == 0 {
-				cdfMinR = cdfR[i]
-			}
-			if cdfG[i] != 0 && cdfMinG == 0 {
-				cdfMinG = cdfG[i]
-			}
-			if cdfB[i] != 0 && cdfMinB == 0 {
-				cdfMinB = cdfB[i]
-			}
-		}(i)
-	}
-	semaforo.Wait()
-
-	for i := 0; i < 256; i++ {
-		semaforo.Add(1)
-		go func(i int) {
-			defer semaforo.Done()
-			mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / (totalPixels - cdfMinR))
-			mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / (totalPixels - cdfMinG))
-			mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / (totalPixels - cdfMinB))
-		}(i)
-	}
-	semaforo.Wait()
-
-	// aplicando mapeamento nos pixels
-	imgNova := image.NewRGBA(dimensões)
-	for y := 0; y < altura; y++ {
-		for x := 0; x < largura; x++ {
-			semaforo.Add(1)
-			// na sessão crrítica desse código há apenas condição de corrida de leitura, o que não é um problema
-			go func(x, y int) {
-				defer semaforo.Done()
-				rgb := img.RGBAAt(x, y)
-				imgNova.SetRGBA(x, y, color.RGBA{
-					R: mapR[rgb.R],
-					G: mapG[rgb.G],
-					B: mapB[rgb.B],
-					A: rgb.A,
-				})
-			}(x, y)
+		if cdfR[i] != 0 && cdfMinR == 0 {
+			cdfMinR = cdfR[i]
+		}
+		if cdfG[i] != 0 && cdfMinG == 0 {
+			cdfMinG = cdfG[i]
+		}
+		if cdfB[i] != 0 && cdfMinB == 0 {
+			cdfMinB = cdfB[i]
 		}
 	}
-	semaforo.Wait()
 
-	return imgNova
+	for i := 0; i < 256; i++ {
+		mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / (totalPixels - cdfMinR))
+		mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / (totalPixels - cdfMinG))
+		mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / (totalPixels - cdfMinB))
+	}
+
+	// aplicando mapeamento nos pixels
+	imgNov := image.NewRGBA(dimensões)
+
+	for y := 0; y < altura; y++ {
+		for x := 0; x < largura; x++ {
+			rgb := img.RGBAAt(x, y)
+			imgNov.SetRGBA(x, y, color.RGBA{
+				R: mapR[rgb.R],
+				G: mapG[rgb.G],
+				B: mapB[rgb.B],
+				A: rgb.A,
+			})
+		}
+	}
+
+	return imgNov
 }
