@@ -1,0 +1,17 @@
+nome: box10x1
+altura: 10
+largura: 1
+escala: 10
+bias: 0
+funcao: identidade
+mascara:
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
