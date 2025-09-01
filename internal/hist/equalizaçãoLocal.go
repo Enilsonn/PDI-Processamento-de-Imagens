@@ -35,6 +35,7 @@ func EqualizaçãoLocal(img *image.RGBA, m, n int) *image.RGBA {
 
 			minY := utils.Max(0, y-metadeN)
 			maxY := utils.Min(altura-1, y+metadeN)
+
 			// calculando histograma dentro da janela
 			histR := make([]int, 256)
 			histG := make([]int, 256)
@@ -86,37 +87,14 @@ func EqualizaçãoLocal(img *image.RGBA, m, n int) *image.RGBA {
 			mapB := make([]uint8, 256)
 
 			totalPixels := int((maxX - minX) * (maxY - minY))
-			/*
-				for i := 0; i < 256; i++ {
-					mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / (totalPixels - cdfMinR))
-					mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / (totalPixels - cdfMinG))
-					mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / (totalPixels - cdfMinB))
 
-				}
-			*/
 			for i := 0; i < 256; i++ {
-				denomR := totalPixels - cdfMinR
-				denomG := totalPixels - cdfMinG
-				denomB := totalPixels - cdfMinB
+				mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / (totalPixels - cdfMinR))
+				mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / (totalPixels - cdfMinG))
+				mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / (totalPixels - cdfMinB))
 
-				if denomR <= 0 {
-					mapR[i] = uint8(i)
-				} else {
-					mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / denomR)
-				}
-
-				if denomG <= 0 {
-					mapG[i] = uint8(i)
-				} else {
-					mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / denomG)
-				}
-
-				if denomB <= 0 {
-					mapB[i] = uint8(i)
-				} else {
-					mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / denomB)
-				}
 			}
+
 			rgb := img.RGBAAt(x, y)
 			imgNova.SetRGBA(x, y, color.RGBA{
 				R: mapR[rgb.R],
