@@ -36,7 +36,7 @@ func EqualizaçãoLocal(img *image.RGBA, m, n int) *image.RGBA {
 
 			for j := minY; j < maxY; j++ {
 				for i := minX; i < maxX; i++ {
-					rgb := img.RGBAAt(x, y)
+					rgb := img.RGBAAt(int(i), int(j))
 					histR[rgb.R]++
 					histG[rgb.G]++
 					histB[rgb.B]++
@@ -52,7 +52,7 @@ func EqualizaçãoLocal(img *image.RGBA, m, n int) *image.RGBA {
 			cdfG[0] = histG[0]
 			cdfB[0] = histB[0]
 
-			for i := 0; i < 256; i++ {
+			for i := 1; i < 256; i++ {
 				cdfR[i] = cdfR[i-1] + histR[i]
 				cdfG[i] = cdfG[i-1] + histG[i]
 				cdfB[i] = cdfB[i-1] + histB[i]

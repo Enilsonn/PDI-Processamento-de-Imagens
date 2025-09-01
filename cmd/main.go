@@ -42,7 +42,6 @@ func main() {
 
 		imgRGB = corr.AplicarCorrelação(imgRGB, kernel)
 	}
-
 	// aplicando histograma (se houver)
 	if *histograma != "" {
 		switch *histograma {

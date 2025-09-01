@@ -23,8 +23,8 @@ func Equalização(img *image.RGBA) *image.RGBA {
 	histB := make([]int, 256)
 
 	// calculando histograma
-	for y := 0; y < altura; y++ {
-		for x := 0; y < largura; x++ {
+	for y := dimensões.Min.Y; y < dimensões.Max.Y; y++ {
+		for x := dimensões.Min.X; x < dimensões.Max.X; x++ {
 			// como nesse caso varias gorrotines podem acessar a mesma variavel, histR[i] por exemplo,
 			// tornar esse processamento concorrente não dá grandes ganhos por causa da quantidade de
 			// condição de corrida
@@ -82,8 +82,8 @@ func Equalização(img *image.RGBA) *image.RGBA {
 	// aplicando mapeamento nos pixels
 	imgNov := image.NewRGBA(dimensões)
 
-	for y := 0; y < altura; y++ {
-		for x := 0; x < largura; x++ {
+	for y := dimensões.Min.Y; y < dimensões.Max.Y; y++ {
+		for x := dimensões.Min.X; x < dimensões.Max.X; x++ {
 			rgb := img.RGBAAt(x, y)
 			imgNov.SetRGBA(x, y, color.RGBA{
 				R: mapR[rgb.R],

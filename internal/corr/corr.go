@@ -3,7 +3,6 @@ package corr
 import (
 	"image"
 	"image/color"
-	"sync"
 
 	"github.com/Enilsonn/PDI-Processamento-de-Imagens/internal/kernels"
 	"github.com/Enilsonn/PDI-Processamento-de-Imagens/internal/utils"
@@ -29,14 +28,13 @@ func AplicarCorrelação(img *image.RGBA, kernel *kernels.Kernel) *image.RGBA {
 			var sumR, sumG, sumB int
 
 			// agora para cada pixel (central) vamos aplicar o kernel
-			var semaforoJanela sync.WaitGroup
 			for ky := 0; ky < kerAltura; ky++ {
 				for kx := 0; kx < kerLargura; kx++ {
 
 					iy := y + ky - b // pixel da imagem + "pixel" do kernel - offset do kernel em altura
 					ix := x + kx - a // pixel da imagem + "pixel" do kernel - offset do kernel em largura
 
-					// como o professor pediu sem extensão, caso o ponto extravaze a imagem, vamos ignorá-lo
+					// caso o ponto extravaze a imagem, vamos ignorá-lo
 					if ix < 0 || ix >= dimensoes.Max.X || iy < 0 || iy >= dimensoes.Max.Y {
 						continue
 					}
@@ -49,7 +47,6 @@ func AplicarCorrelação(img *image.RGBA, kernel *kernels.Kernel) *image.RGBA {
 					sumB += int(rgb.B) * pesoDaMáscara
 				}
 			}
-			semaforoJanela.Wait()
 
 			//bias
 			sumR += kernel.Bias
@@ -81,6 +78,7 @@ func AplicarCorrelação(img *image.RGBA, kernel *kernels.Kernel) *image.RGBA {
 				sumG = utils.Abs(sumG)
 				sumB = utils.Abs(sumB)
 			}
+
 			imgComFiltro.SetRGBA(x, y, color.RGBA{
 				R: utils.Limiar(sumR, 0, 255),
 				G: utils.Limiar(sumG, 0, 255),
