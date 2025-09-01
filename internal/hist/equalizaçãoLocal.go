@@ -18,17 +18,23 @@ func EqualizaçãoLocal(img *image.RGBA, m, n int) *image.RGBA {
 	metadeM := m / 2
 	metadeN := n / 2
 
-	for y := 0; y < altura; y++ {
-		for x := 0; x < largura; x++ {
+	for y := dimensões.Min.Y; y < dimensões.Max.Y; y++ {
+		for x := dimensões.Min.X; x < dimensões.Max.X; x++ {
+			/*
+				// definindo a janela ao redor do pixel central na largura
+				minX := utils.Limiar(x-metadeM, 0, largura-1)
+				maxX := utils.Limiar(x+metadeM, 0, largura-1)
 
-			// definindo a janela ao redor do pixel central na largura
-			minX := utils.Limiar(x-metadeM, 0, largura-1)
-			maxX := utils.Limiar(x+metadeM, 0, largura-1)
+				// definindo a janela ao redor do pixel central na altura
+				minY := utils.Limiar(y-metadeN, 0, altura-1)
+				maxY := utils.Limiar(y+metadeN, 0, altura-1)
+			*/
 
-			// definindo a janela ao redor do pixel central na altura
-			minY := utils.Limiar(y-metadeN, 0, altura-1)
-			maxY := utils.Limiar(y+metadeN, 0, altura-1)
+			minX := utils.Max(0, x-metadeM)
+			maxX := utils.Min(largura-1, x+metadeM)
 
+			minY := utils.Max(0, y-metadeN)
+			maxY := utils.Min(altura-1, y+metadeN)
 			// calculando histograma dentro da janela
 			histR := make([]int, 256)
 			histG := make([]int, 256)
@@ -79,14 +85,38 @@ func EqualizaçãoLocal(img *image.RGBA, m, n int) *image.RGBA {
 			mapG := make([]uint8, 256)
 			mapB := make([]uint8, 256)
 
-			totalPixels := int((maxX - minX + 1) * (maxY - minY + 1))
+			totalPixels := int((maxX - minX) * (maxY - minY))
+			/*
+				for i := 0; i < 256; i++ {
+					mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / (totalPixels - cdfMinR))
+					mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / (totalPixels - cdfMinG))
+					mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / (totalPixels - cdfMinB))
+
+				}
+			*/
 			for i := 0; i < 256; i++ {
-				mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / (totalPixels - cdfMinR))
-				mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / (totalPixels - cdfMinG))
-				mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / (totalPixels - cdfMinB))
+				denomR := totalPixels - cdfMinR
+				denomG := totalPixels - cdfMinG
+				denomB := totalPixels - cdfMinB
 
+				if denomR <= 0 {
+					mapR[i] = uint8(i)
+				} else {
+					mapR[i] = uint8(((cdfR[i] - cdfMinR) * 255) / denomR)
+				}
+
+				if denomG <= 0 {
+					mapG[i] = uint8(i)
+				} else {
+					mapG[i] = uint8(((cdfG[i] - cdfMinG) * 255) / denomG)
+				}
+
+				if denomB <= 0 {
+					mapB[i] = uint8(i)
+				} else {
+					mapB[i] = uint8(((cdfB[i] - cdfMinB) * 255) / denomB)
+				}
 			}
-
 			rgb := img.RGBAAt(x, y)
 			imgNova.SetRGBA(x, y, color.RGBA{
 				R: mapR[rgb.R],
